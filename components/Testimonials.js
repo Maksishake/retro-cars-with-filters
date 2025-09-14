@@ -59,7 +59,6 @@ const testimonials = [
 
 export default function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
 
   const nextTestimonial = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -72,14 +71,6 @@ export default function Testimonials() {
   const goToTestimonial = (index) => {
     setCurrentIndex(index);
   };
-
-  // Auto-play functionality
-  useState(() => {
-    if (isAutoPlay) {
-      const interval = setInterval(nextTestimonial, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isAutoPlay, currentIndex]);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -161,19 +152,6 @@ export default function Testimonials() {
             </button>
           </div>
 
-          {/* Auto-play toggle */}
-          <div className="text-center mt-4">
-            <button
-              onClick={() => setIsAutoPlay(!isAutoPlay)}
-              className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 ${
-                isAutoPlay 
-                  ? 'bg-red-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {isAutoPlay ? '⏸️ Пауза' : '▶️ Автопрокрутка'}
-            </button>
-          </div>
         </div>
       </div>
     </div>

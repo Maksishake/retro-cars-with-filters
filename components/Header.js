@@ -1,45 +1,46 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('ru');
 
   return (
-    <header className="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
+    <header className="bg-gradient-to-r from-red-800 via-red-700 to-red-900 text-white shadow-2xl backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-6">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="text-red-800 font-bold text-xl">R</span>
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="w-12 h-12 bg-gradient-to-br from-white to-red-100 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <span className="text-red-800 font-bold text-2xl">R</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold">RetroCars</h1>
-                <p className="text-sm text-red-200">Soviet Classic Cars</p>
+                <h1 className="text-3xl font-bold gradient-text">RetroCars</h1>
+                <p className="text-sm text-red-200/80 font-medium">Soviet Classic Cars</p>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="hover:text-red-200 transition-colors duration-200 font-medium">
+          <nav className="hidden md:flex items-center space-x-2">
+            <Link href="/" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
               Главная
             </Link>
-            <Link href="/about" className="hover:text-red-200 transition-colors duration-200 font-medium">
+            <Link href="/about" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
               О нас
             </Link>
-            <Link href="/blog" className="hover:text-red-200 transition-colors duration-200 font-medium">
+            <Link href="/blog" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
               Блог
             </Link>
-            <Link href="/contact" className="hover:text-red-200 transition-colors duration-200 font-medium">
+            <Link href="/contact" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
               Контакты
             </Link>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">🇩🇪</span>
-              <span className="text-sm">🇳🇱</span>
-              <span className="text-sm">🇫🇷</span>
-              <span className="text-sm">🇪🇸</span>
-            </div>
+            <div className="w-px h-8 bg-white/20 mx-2"></div>
+            <LanguageSwitcher 
+              currentLanguage={currentLanguage} 
+              onLanguageChange={setCurrentLanguage} 
+            />
           </nav>
 
           {/* Mobile menu button */}
@@ -57,20 +58,26 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-red-900 rounded-lg mb-4">
-              <Link href="/" className="block px-3 py-2 hover:text-red-200 transition-colors duration-200">
+          <div className="md:hidden mt-4">
+            <div className="px-4 pt-4 pb-6 space-y-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+              <Link href="/" className="block px-4 py-3 rounded-xl hover:bg-white/20 transition-all duration-200 font-medium">
                 Главная
               </Link>
-              <Link href="/about" className="block px-3 py-2 hover:text-red-200 transition-colors duration-200">
+              <Link href="/about" className="block px-4 py-3 rounded-xl hover:bg-white/20 transition-all duration-200 font-medium">
                 О нас
               </Link>
-              <Link href="/blog" className="block px-3 py-2 hover:text-red-200 transition-colors duration-200">
+              <Link href="/blog" className="block px-4 py-3 rounded-xl hover:bg-white/20 transition-all duration-200 font-medium">
                 Блог
               </Link>
-              <Link href="/contact" className="block px-3 py-2 hover:text-red-200 transition-colors duration-200">
+              <Link href="/contact" className="block px-4 py-3 rounded-xl hover:bg-white/20 transition-all duration-200 font-medium">
                 Контакты
               </Link>
+              <div className="pt-2 border-t border-white/20">
+                <LanguageSwitcher 
+                  currentLanguage={currentLanguage} 
+                  onLanguageChange={setCurrentLanguage} 
+                />
+              </div>
             </div>
           </div>
         )}

@@ -3,6 +3,9 @@ import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CarCard from '../components/CarCard';
+import SearchFilters from '../components/SearchFilters';
+import StatsSection from '../components/StatsSection';
+import NewsSection from '../components/NewsSection';
 import Testimonials from '../components/Testimonials';
 import StructuredData from '../components/StructuredData';
 import cars from '../data/cars';
@@ -15,15 +18,20 @@ export default function Home() {
   const [conditionFilter, setConditionFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [fuelTypeFilter, setFuelTypeFilter] = useState('');
+  const [transmissionFilter, setTransmissionFilter] = useState('');
+  const [colorFilter, setColorFilter] = useState('');
+  const [sortBy, setSortBy] = useState('price-asc');
 
   // Get unique values for filters
-  const brands = [...new Set(cars.map(car => car.brand))];
-  const categories = [...new Set(cars.map(car => car.category))];
-  const conditions = [...new Set(cars.map(car => car.condition))];
-  const locations = [...new Set(cars.map(car => car.location))];
-  const years = [...new Set(cars.map(car => car.year))].sort((a, b) => b - a);
+  const allBrands = useMemo(() => [...new Set(cars.map(car => car.brand))], []);
+  const allYears = useMemo(() => [...new Set(cars.map(car => car.year))].sort((a, b) => b - a), []);
+  const allConditions = useMemo(() => [...new Set(cars.map(car => car.condition))], []);
+  const allLocations = useMemo(() => [...new Set(cars.map(car => car.location))], []);
+  const allCategories = useMemo(() => [...new Set(cars.map(car => car.category))], []);
+  const allFuelTypes = useMemo(() => [...new Set(cars.map(car => car.fuelType))], []);
+  const allTransmissions = useMemo(() => [...new Set(cars.map(car => car.transmission))], []);
+  const allColors = useMemo(() => [...new Set(cars.map(car => car.color))], []);
 
   const filteredAndSortedCars = useMemo(() => {
     let filtered = cars.filter(car => {
@@ -36,57 +44,43 @@ export default function Home() {
       const matchesCategory = !categoryFilter || car.category === categoryFilter;
       const matchesCondition = !conditionFilter || car.condition === conditionFilter;
       const matchesLocation = !locationFilter || car.location === locationFilter;
+      const matchesFuelType = !fuelTypeFilter || car.fuelType === fuelTypeFilter;
+      const matchesTransmission = !transmissionFilter || car.transmission === transmissionFilter;
+      const matchesColor = !colorFilter || car.color === colorFilter;
       
       const matchesPriceMin = !priceRange.min || car.price >= parseInt(priceRange.min);
       const matchesPriceMax = !priceRange.max || car.price <= parseInt(priceRange.max);
 
       return matchesSearch && matchesYear && matchesBrand && matchesCategory && 
-             matchesCondition && matchesLocation && matchesPriceMin && matchesPriceMax;
+             matchesCondition && matchesLocation && matchesFuelType && matchesTransmission &&
+             matchesColor && matchesPriceMin && matchesPriceMax;
     });
 
     // Sort cars
-    filtered.sort((a, b) => {
-      let aValue, bValue;
-      
+    return filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'price':
-          aValue = a.price;
-          bValue = b.price;
-          break;
-        case 'year':
-          aValue = a.year;
-          bValue = b.year;
-          break;
-        case 'mileage':
-          aValue = a.mileage;
-          bValue = b.mileage;
-          break;
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'year-desc':
+          return b.year - a.year;
+        case 'year-asc':
+          return a.year - b.year;
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'mileage-asc':
+          return a.mileage - b.mileage;
+        case 'mileage-desc':
+          return b.mileage - a.mileage;
         default:
-          aValue = a.name;
-          bValue = b.name;
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
+          return 0;
       }
     });
-
-    return filtered;
-  }, [search, yearFilter, brandFilter, categoryFilter, conditionFilter, locationFilter, priceRange, sortBy, sortOrder]);
-
-  const clearFilters = () => {
-    setSearch('');
-    setYearFilter('');
-    setBrandFilter('');
-    setCategoryFilter('');
-    setConditionFilter('');
-    setLocationFilter('');
-    setPriceRange({ min: '', max: '' });
-    setSortBy('name');
-    setSortOrder('asc');
-  };
+  }, [cars, search, yearFilter, brandFilter, categoryFilter, conditionFilter, 
+      locationFilter, priceRange, fuelTypeFilter, transmissionFilter, colorFilter, sortBy]);
 
   return (
     <>
@@ -97,195 +91,109 @@ export default function Home() {
         <meta property="og:title" content="RetroCars - Советские ретро автомобили в Европе" />
         <meta property="og:description" content="Каталог советских ретро автомобилей в Западной Европе" />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.retrocars.eu" />
+        <meta property="og:image" content="https://www.retrocars.eu/og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="RetroCars - Советские ретро автомобили в Европе" />
+        <meta name="twitter:description" content="Каталог советских ретро автомобилей в Западной Европе" />
+        <meta name="twitter:image" content="https://www.retrocars.eu/og-image.jpg" />
       </Head>
-      
+
       <StructuredData data={{ cars }} />
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <Header />
         
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Каталог <span className="text-red-600">советских ретро автомобилей</span>
+        {/* Hero Section */}
+        <section className="relative py-20 bg-gradient-to-r from-red-800 via-red-700 to-red-900 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-red-800/90 to-red-900/90"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text">
+              Советские ретро автомобили
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Откройте для себя уникальную коллекцию советских классических автомобилей. 
-              Каждый экземпляр тщательно отобран и отреставрирован нашими мастерами.
+            <p className="text-xl md:text-2xl text-red-100 mb-8 max-w-3xl mx-auto">
+              Откройте для себя легендарные автомобили СССР в отличном состоянии. 
+              Полная реставрация, оформление документов, доставка по всей Европе.
             </p>
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 lg:mb-0">Фильтры и поиск</h2>
-              <button
-                onClick={clearFilters}
-                className="text-red-600 hover:text-red-700 font-medium"
-              >
-                Очистить все фильтры
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="btn-primary text-lg px-8 py-4">
+                Смотреть каталог
+              </button>
+              <button className="btn-secondary text-lg px-8 py-4">
+                Узнать больше
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {/* Search */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Поиск</label>
-                <input
-                  type="text"
-                  placeholder="Название, марка, описание..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-
-              {/* Brand Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Марка</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={brandFilter}
-                  onChange={(e) => setBrandFilter(e.target.value)}
-                >
-                  <option value="">Все марки</option>
-                  {brands.map(brand => (
-                    <option key={brand} value={brand}>{brand}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Year Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Год выпуска</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={yearFilter}
-                  onChange={(e) => setYearFilter(e.target.value)}
-                >
-                  <option value="">Все годы</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Категория</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                >
-                  <option value="">Все категории</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {/* Condition Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Состояние</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={conditionFilter}
-                  onChange={(e) => setConditionFilter(e.target.value)}
-                >
-                  <option value="">Любое состояние</option>
-                  {conditions.map(condition => (
-                    <option key={condition} value={condition}>{condition}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Location Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Местоположение</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                >
-                  <option value="">Все страны</option>
-                  {locations.map(location => (
-                    <option key={location} value={location}>{location}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Цена от (€)</label>
-                <input
-                  type="number"
-                  placeholder="Минимум"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange({...priceRange, min: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Цена до (€)</label>
-                <input
-                  type="number"
-                  placeholder="Максимум"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange({...priceRange, max: e.target.value})}
-                />
-              </div>
-            </div>
-
-            {/* Sort Options */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Сортировка:</label>
-                <select
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="name">По названию</option>
-                  <option value="price">По цене</option>
-                  <option value="year">По году выпуска</option>
-                  <option value="mileage">По пробегу</option>
-                </select>
-                <select
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                >
-                  <option value="asc">По возрастанию</option>
-                  <option value="desc">По убыванию</option>
-                </select>
-              </div>
-              <div className="text-sm text-gray-600">
-                Найдено: {filteredAndSortedCars.length} автомобилей
-              </div>
-            </div>
           </div>
+        </section>
 
-          {/* Results */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Search and Filters */}
+          <SearchFilters
+            search={search}
+            setSearch={setSearch}
+            yearFilter={yearFilter}
+            setYearFilter={setYearFilter}
+            brandFilter={brandFilter}
+            setBrandFilter={setBrandFilter}
+            conditionFilter={conditionFilter}
+            setConditionFilter={setConditionFilter}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            fuelTypeFilter={fuelTypeFilter}
+            setFuelTypeFilter={setFuelTypeFilter}
+            transmissionFilter={transmissionFilter}
+            setTransmissionFilter={setTransmissionFilter}
+            colorFilter={colorFilter}
+            setColorFilter={setColorFilter}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            allBrands={allBrands}
+            allYears={allYears}
+            allConditions={allConditions}
+            allLocations={allLocations}
+            allCategories={allCategories}
+            allFuelTypes={allFuelTypes}
+            allTransmissions={allTransmissions}
+            allColors={allColors}
+            filteredCarsCount={filteredAndSortedCars.length}
+          />
+
+          {/* Cars Grid */}
           {filteredAndSortedCars.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Автомобили не найдены</h3>
-              <p className="text-gray-600 mb-6">Попробуйте изменить параметры поиска</p>
-              <button
-                onClick={clearFilters}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Автомобили не найдены</h3>
+              <p className="text-lg text-gray-600 mb-8">Попробуйте изменить параметры поиска</p>
+              <button 
+                onClick={() => {
+                  setSearch('');
+                  setYearFilter('');
+                  setBrandFilter('');
+                  setCategoryFilter('');
+                  setConditionFilter('');
+                  setLocationFilter('');
+                  setPriceRange({ min: '', max: '' });
+                  setFuelTypeFilter('');
+                  setTransmissionFilter('');
+                  setColorFilter('');
+                  setSortBy('price-asc');
+                }}
+                className="btn-primary"
               >
-                Очистить фильтры
+                Сбросить фильтры
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAndSortedCars.map(car => (
                 <CarCard key={car.id} car={car} />
               ))}
@@ -293,7 +201,15 @@ export default function Home() {
           )}
         </main>
 
+        {/* Stats Section */}
+        <StatsSection />
+
+        {/* News Section */}
+        <NewsSection />
+
+        {/* Testimonials */}
         <Testimonials />
+
         <Footer />
       </div>
     </>

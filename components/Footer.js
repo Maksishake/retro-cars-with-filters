@@ -2,16 +2,19 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-red-800 font-bold text-lg">R</span>
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-white to-red-100 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-red-800 font-bold text-xl">R</span>
               </div>
-              <h3 className="text-xl font-bold">RetroCars</h3>
+              <div>
+                <h3 className="text-2xl font-bold gradient-text">RetroCars</h3>
+                <p className="text-sm text-gray-300">Soviet Classic Cars</p>
+              </div>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
               Специализируемся на продаже и реставрации советских ретро автомобилей в Западной Европе. 

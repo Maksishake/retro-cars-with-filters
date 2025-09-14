@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,36 +8,59 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gradient-to-br from-slate-50 via-white to-slate-100 text-gray-900 antialiased;
+    background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
+  * {
+    @apply border-gray-200;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-500/30 focus:ring-offset-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
   }
   
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-red-600 font-medium py-2 px-4 rounded-lg border-2 border-red-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply bg-white/80 backdrop-blur-sm hover:bg-white text-red-600 font-semibold py-3 px-6 rounded-xl border-2 border-red-600/20 hover:border-red-600/40 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:ring-offset-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-european hover:shadow-european-lg transition-shadow duration-300;
+    @apply bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/20 hover:border-white/40;
+  }
+  
+  .card-premium {
+    @apply bg-gradient-to-br from-white/90 to-white/70 backdrop-blur-md rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 border border-white/30 hover:border-white/50 transform hover:-translate-y-2;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors duration-200;
+    @apply w-full px-4 py-3 border border-gray-200/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500/50 transition-all duration-300 bg-white/80 backdrop-blur-sm placeholder:text-gray-500;
   }
   
   .select-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors duration-200 bg-white;
+    @apply w-full px-4 py-3 border border-gray-200/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-500/20 focus:border-red-500/50 transition-all duration-300 bg-white/80 backdrop-blur-sm;
+  }
+  
+  .glass-effect {
+    @apply bg-white/20 backdrop-blur-md border border-white/30;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-red-50 via-white to-red-50;
   }
   
   .line-clamp-2 {
@@ -52,6 +76,26 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  .slide-in-left {
+    animation: slide-in-left 0.5s ease-out;
+  }
+  
+  .slide-in-right {
+    animation: slide-in-right 0.5s ease-out;
+  }
+  
+  .fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
 }
 
 @layer utilities {
@@ -65,5 +109,56 @@
   
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
