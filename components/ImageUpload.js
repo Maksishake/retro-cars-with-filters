@@ -1,18 +1,52 @@
 import { useState, useRef } from 'react';
 
-export default function ImageUpload({ onImagesChange, existingImages = [] }) {
+export default function ImageUpload({ onImagesChange, existingImages = [], maxFiles = 30 }) {
   const [images, setImages] = useState(existingImages);
   const [dragActive, setDragActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const fileInputRef = useRef(null);
 
+  const validateFile = (file) => {
+    const maxSize = file.type.startsWith('video/') ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB для видео, 10MB для фото
+    const maxVideoDuration = 60; // 60 секунд
+    
+    if (file.size > maxSize) {
+      alert(`Файл ${file.name} слишком большой. Максимальный размер: ${formatFileSize(maxSize)}`);
+      return false;
+    }
+    
+    if (file.type.startsWith('video/')) {
+      // Проверяем длительность видео
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        if (video.duration > maxVideoDuration) {
+          alert(`Видео ${file.name} слишком длинное. Максимальная длительность: ${maxVideoDuration} секунд`);
+          return false;
+        }
+      };
+    }
+    
+    return true;
+  };
+
   const handleFiles = (files) => {
-    const newImages = Array.from(files).map(file => ({
+    const validFiles = Array.from(files).filter(validateFile);
+    
+    if (images.length + validFiles.length > maxFiles) {
+      alert(`Максимальное количество файлов: ${maxFiles}. У вас уже загружено: ${images.length}`);
+      return;
+    }
+    
+    const newImages = validFiles.map(file => ({
       id: Date.now() + Math.random(),
       file: file,
       url: URL.createObjectURL(file),
       name: file.name,
       size: file.size,
-      type: file.type
+      type: file.type,
+      isVideo: file.type.startsWith('video/'),
+      duration: file.type.startsWith('video/') ? null : null // Будет заполнено после загрузки
     }));
     
     const updatedImages = [...images, ...newImages];
@@ -78,7 +112,7 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/*,video/*"
           onChange={handleChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
@@ -96,7 +130,10 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
           </div>
           
           <p className="text-xs text-gray-500">
-            PNG, JPG, GIF до 10MB каждое
+            Фото: PNG, JPG, GIF до 10MB | Видео: MP4, MOV до 100MB, до 60 сек
+          </p>
+          <p className="text-xs text-gray-500">
+            Максимум файлов: {maxFiles} | Загружено: {images.length}/{maxFiles}
           </p>
         </div>
       </div>
@@ -112,11 +149,20 @@ export default function ImageUpload({ onImagesChange, existingImages = [] }) {
             {images.map((image) => (
               <div key={image.id} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={image.url}
-                    alt={image.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
+                  {image.isVideo ? (
+                    <video
+                      src={image.url}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      controls
+                      preload="metadata"
+                    />
+                  ) : (
+                    <img
+                      src={image.url}
+                      alt={image.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                  )}
                 </div>
                 
                 {/* Image Info */}

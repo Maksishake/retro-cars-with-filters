@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -22,19 +22,28 @@ export default function Home() {
   const [transmissionFilter, setTransmissionFilter] = useState('');
   const [colorFilter, setColorFilter] = useState('');
   const [sortBy, setSortBy] = useState('price-asc');
+  const [allCars, setAllCars] = useState(cars);
+
+  // Загружаем данные из localStorage при загрузке страницы
+  useEffect(() => {
+    const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+    if (savedCars.length > 0) {
+      setAllCars(savedCars);
+    }
+  }, []);
 
   // Get unique values for filters
-  const allBrands = useMemo(() => [...new Set(cars.map(car => car.brand))], []);
-  const allYears = useMemo(() => [...new Set(cars.map(car => car.year))].sort((a, b) => b - a), []);
-  const allConditions = useMemo(() => [...new Set(cars.map(car => car.condition))], []);
-  const allLocations = useMemo(() => [...new Set(cars.map(car => car.location))], []);
-  const allCategories = useMemo(() => [...new Set(cars.map(car => car.category))], []);
-  const allFuelTypes = useMemo(() => [...new Set(cars.map(car => car.fuelType))], []);
-  const allTransmissions = useMemo(() => [...new Set(cars.map(car => car.transmission))], []);
-  const allColors = useMemo(() => [...new Set(cars.map(car => car.color))], []);
+  const allBrands = useMemo(() => [...new Set(allCars.map(car => car.brand))], [allCars]);
+  const allYears = useMemo(() => [...new Set(allCars.map(car => car.year))].sort((a, b) => b - a), [allCars]);
+  const allConditions = useMemo(() => [...new Set(allCars.map(car => car.condition))], [allCars]);
+  const allLocations = useMemo(() => [...new Set(allCars.map(car => car.location))], [allCars]);
+  const allCategories = useMemo(() => [...new Set(allCars.map(car => car.category))], [allCars]);
+  const allFuelTypes = useMemo(() => [...new Set(allCars.map(car => car.fuelType))], [allCars]);
+  const allTransmissions = useMemo(() => [...new Set(allCars.map(car => car.transmission))], [allCars]);
+  const allColors = useMemo(() => [...new Set(allCars.map(car => car.color))], [allCars]);
 
   const filteredAndSortedCars = useMemo(() => {
-    let filtered = cars.filter(car => {
+    let filtered = allCars.filter(car => {
       const matchesSearch = car.name.toLowerCase().includes(search.toLowerCase()) ||
                            car.brand.toLowerCase().includes(search.toLowerCase()) ||
                            car.description.toLowerCase().includes(search.toLowerCase());
@@ -79,7 +88,7 @@ export default function Home() {
           return 0;
       }
     });
-  }, [cars, search, yearFilter, brandFilter, categoryFilter, conditionFilter, 
+  }, [allCars, search, yearFilter, brandFilter, categoryFilter, conditionFilter, 
       locationFilter, priceRange, fuelTypeFilter, transmissionFilter, colorFilter, sortBy]);
 
   return (

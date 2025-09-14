@@ -295,18 +295,43 @@ export default function CarDetail({ car }) {
 }
 
 export async function getStaticPaths() {
-  const paths = cars.map((car) => ({
+  // Получаем данные из localStorage или из файла
+  let allCars = cars;
+  
+  try {
+    // В реальном приложении здесь будет API запрос
+    const savedCars = JSON.parse(process.env.NODE_ENV === 'development' ? '[]' : '[]');
+    if (savedCars.length > 0) {
+      allCars = savedCars;
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+  }
+
+  const paths = allCars.map((car) => ({
     params: { id: car.id },
   }));
 
   return {
     paths,
-    fallback: false,
+    fallback: true, // Изменено на true для динамических данных
   };
 }
 
 export async function getStaticProps({ params }) {
-  const car = cars.find((car) => car.id === params.id);
+  let allCars = cars;
+  
+  try {
+    // В реальном приложении здесь будет API запрос
+    const savedCars = JSON.parse(process.env.NODE_ENV === 'development' ? '[]' : '[]');
+    if (savedCars.length > 0) {
+      allCars = savedCars;
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+  }
+
+  const car = allCars.find((car) => car.id === params.id);
 
   return {
     props: {

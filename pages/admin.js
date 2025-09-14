@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ImageUpload from '../components/ImageUpload';
 
 export default function Admin() {
   const [cars, setCars] = useState([]);
@@ -29,16 +30,26 @@ export default function Admin() {
 
   // Загружаем данные автомобилей
   useEffect(() => {
-    // В реальном приложении здесь будет API запрос
-    const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
-    if (savedCars.length > 0) {
-      setCars(savedCars);
-    } else {
-      // Загружаем из файла cars.js
-      import('../data/cars').then(module => {
-        setCars(module.default);
-      });
-    }
+    const loadCars = async () => {
+      try {
+        // Сначала пробуем загрузить из localStorage
+        const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+        if (savedCars.length > 0) {
+          setCars(savedCars);
+        } else {
+          // Загружаем из файла cars.js
+          const carsModule = await import('../data/cars');
+          setCars(carsModule.default);
+          // Сохраняем в localStorage для дальнейшего использования
+          localStorage.setItem('cars', JSON.stringify(carsModule.default));
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        setCars([]);
+      }
+    };
+    
+    loadCars();
   }, []);
 
   const handleInputChange = (e) => {
@@ -72,27 +83,40 @@ export default function Admin() {
   };
 
   const saveCar = () => {
-    if (isEditing && selectedCar) {
-      // Редактирование существующего автомобиля
-      const updatedCars = cars.map(car => 
-        car.id === selectedCar.id ? { ...formData, id: selectedCar.id } : car
-      );
-      setCars(updatedCars);
-      localStorage.setItem('cars', JSON.stringify(updatedCars));
-    } else {
-      // Добавление нового автомобиля
-      const newCar = {
-        ...formData,
-        id: Date.now().toString(),
-        currency: 'EUR',
-        image: formData.images[0]?.url || '/images/default-car.svg'
-      };
-      const updatedCars = [...cars, newCar];
-      setCars(updatedCars);
-      localStorage.setItem('cars', JSON.stringify(updatedCars));
+    try {
+      if (isEditing && selectedCar) {
+        // Редактирование существующего автомобиля
+        const updatedCars = cars.map(car => 
+          car.id === selectedCar.id ? { 
+            ...formData, 
+            id: selectedCar.id,
+            updatedAt: new Date().toISOString()
+          } : car
+        );
+        setCars(updatedCars);
+        localStorage.setItem('cars', JSON.stringify(updatedCars));
+        alert('Автомобиль успешно обновлен!');
+      } else {
+        // Добавление нового автомобиля
+        const newCar = {
+          ...formData,
+          id: Date.now().toString(),
+          currency: 'EUR',
+          image: formData.images[0]?.url || '/images/default-car.svg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        const updatedCars = [...cars, newCar];
+        setCars(updatedCars);
+        localStorage.setItem('cars', JSON.stringify(updatedCars));
+        alert('Автомобиль успешно добавлен!');
+      }
+      
+      resetForm();
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      alert('Ошибка при сохранении автомобиля');
     }
-    
-    resetForm();
   };
 
   const editCar = (car) => {
@@ -365,35 +389,14 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Фотографии</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="input-field"
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Фотографии и видео (до 30 файлов)
+                  </label>
+                  <ImageUpload
+                    onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+                    existingImages={formData.images}
+                    maxFiles={30}
                   />
-                  {formData.images.length > 0 && (
-                    <div className="mt-2 grid grid-cols-4 gap-2">
-                      {formData.images.map((img, index) => (
-                        <div key={index} className="relative">
-                          <img src={img.url} alt={img.name} className="w-full h-20 object-cover rounded" />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFormData(prev => ({
-                                ...prev,
-                                images: prev.images.filter((_, i) => i !== index)
-                              }));
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex space-x-4">
