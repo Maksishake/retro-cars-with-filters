@@ -1,19 +1,25 @@
-# 🔧 Исправление ошибки Vercel
+# 🔧 Исправление ошибок Vercel
 
-## Проблема
-При деплое на Vercel появляется ошибка:
-```
-If `rewrites`, `redirects`, `headers`, `cleanUrls` or `trailingSlash` are used, then `routes` cannot be present.
-```
+## Проблемы
+При деплое на Vercel появляются ошибки:
+1. `If 'rewrites', 'redirects', 'headers', 'cleanUrls' or 'trailingSlash' are used, then 'routes' cannot be present.`
+2. `Due to 'builds' existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply.`
 
 ## ✅ Решение
 
 ### 1. Исправлен vercel.json
-Заменили `routes` на `rewrites` в файле `vercel.json`:
+Убрали устаревшие секции `builds` и `version`, заменили `routes` на `rewrites`:
 
 **Было:**
 ```json
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "routes": [
     {
       "src": "/sitemap.xml",
@@ -30,6 +36,17 @@ If `rewrites`, `redirects`, `headers`, `cleanUrls` or `trailingSlash` are used, 
     {
       "source": "/sitemap.xml",
       "destination": "/sitemap.xml"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
     }
   ]
 }
@@ -76,6 +93,7 @@ vercel --prod
 
 ## 📋 Что исправлено:
 
+- ✅ `vercel.json` - убраны устаревшие `builds` и `version`
 - ✅ `vercel.json` - заменены `routes` на `rewrites`
 - ✅ Google Analytics - используется `next/script`
 - ✅ Favicon файлы - добавлены для избежания 404
