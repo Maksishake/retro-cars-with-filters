@@ -10,6 +10,7 @@ import FeaturesAndHistory from '../../components/FeaturesAndHistory';
 import SimilarCars from '../../components/SimilarCars';
 import FavoriteButton from '../../components/FavoriteButton';
 import CallButton from '../../components/CallButton';
+import { storage } from '../../lib/storage';
 import cars from '../../data/cars';
 
 export default function CarDetail({ carId }) {
@@ -18,11 +19,11 @@ export default function CarDetail({ carId }) {
   const [allCars, setAllCars] = useState(cars);
   const [loading, setLoading] = useState(true);
 
-  // Загружаем данные из localStorage при загрузке страницы
+  // Загружаем данные при загрузке страницы
   useEffect(() => {
     const loadCarData = () => {
       try {
-        const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+        const savedCars = storage.getCars();
         let carsToUse = savedCars.length > 0 ? savedCars : cars;
         
         setAllCars(carsToUse);
@@ -51,6 +52,17 @@ export default function CarDetail({ carId }) {
     };
 
     loadCarData();
+    
+    // Слушаем изменения в других вкладках
+    const unsubscribe = storage.onCarsUpdate((updatedCars) => {
+      setAllCars(updatedCars);
+      const foundCar = updatedCars.find(c => c.id === carId);
+      if (foundCar) {
+        setCar(foundCar);
+      }
+    });
+    
+    return unsubscribe;
   }, [carId]);
 
   if (loading) {

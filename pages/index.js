@@ -8,6 +8,7 @@ import StatsSection from '../components/StatsSection';
 import NewsSection from '../components/NewsSection';
 import Testimonials from '../components/Testimonials';
 import StructuredData from '../components/StructuredData';
+import { storage } from '../lib/storage';
 import cars from '../data/cars';
 
 export default function Home() {
@@ -24,10 +25,10 @@ export default function Home() {
   const [sortBy, setSortBy] = useState('price-asc');
   const [allCars, setAllCars] = useState(cars);
 
-  // Загружаем данные из localStorage при загрузке страницы
+  // Загружаем данные при загрузке страницы
   useEffect(() => {
     const loadCars = () => {
-      const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+      const savedCars = storage.getCars();
       if (savedCars.length > 0) {
         setAllCars(savedCars);
       }
@@ -35,20 +36,12 @@ export default function Home() {
     
     loadCars();
     
-    // Слушаем изменения в localStorage
-    const handleStorageChange = () => {
-      loadCars();
-    };
+    // Слушаем изменения в других вкладках
+    const unsubscribe = storage.onCarsUpdate((updatedCars) => {
+      setAllCars(updatedCars);
+    });
     
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Также обновляем при фокусе на окне (когда возвращаемся с админки)
-    window.addEventListener('focus', loadCars);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', loadCars);
-    };
+    return unsubscribe;
   }, []);
 
   // Get unique values for filters

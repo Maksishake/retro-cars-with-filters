@@ -28,7 +28,7 @@ export default function FavoriteButton({ carId, carName }) {
   return (
     <button
       onClick={toggleFavorite}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+      className={`flex items-center space-x-1 px-2 py-1 rounded-lg transition-all duration-200 text-xs ${
         isFavorite
           ? 'bg-red-500 text-white hover:bg-red-600'
           : 'bg-white/20 text-gray-700 hover:bg-white/30'
@@ -36,7 +36,7 @@ export default function FavoriteButton({ carId, carName }) {
       title={isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'}
     >
       <svg
-        className={`w-5 h-5 ${isFavorite ? 'fill-current' : 'stroke-current'}`}
+        className={`w-4 h-4 ${isFavorite ? 'fill-current' : 'stroke-current'}`}
         fill={isFavorite ? 'currentColor' : 'none'}
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ export default function FavoriteButton({ carId, carName }) {
           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
         />
       </svg>
-      <span className="hidden sm:inline">
+      <span className="hidden sm:inline text-xs">
         {isFavorite ? 'В избранном' : 'В избранное'}
       </span>
     </button>

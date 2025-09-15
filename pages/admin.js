@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ImageUpload from '../components/ImageUpload';
+import { storage } from '../lib/storage';
 
 export default function Admin() {
   const router = useRouter();
@@ -44,26 +45,28 @@ export default function Admin() {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const loadCars = async () => {
-      try {
-        // Сначала пробуем загрузить из localStorage
-        const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
-        if (savedCars.length > 0) {
-          setCars(savedCars);
-        } else {
-          // Загружаем из файла cars.js
-          const carsModule = await import('../data/cars');
-          setCars(carsModule.default);
-          // Сохраняем в localStorage для дальнейшего использования
-          localStorage.setItem('cars', JSON.stringify(carsModule.default));
-        }
-      } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        setCars([]);
+    const loadCars = () => {
+      const savedCars = storage.getCars();
+      if (savedCars.length > 0) {
+        setCars(savedCars);
+      } else {
+        // Загружаем из файла cars.js при первом запуске
+        import('../data/cars').then(module => {
+          const defaultCars = module.default;
+          setCars(defaultCars);
+          storage.saveCars(defaultCars);
+        });
       }
     };
     
     loadCars();
+    
+    // Слушаем изменения в других вкладках
+    const unsubscribe = storage.onCarsUpdate((updatedCars) => {
+      setCars(updatedCars);
+    });
+    
+    return unsubscribe;
   }, [isAuthenticated]);
 
   const handleLogin = (e) => {
@@ -116,36 +119,28 @@ export default function Admin() {
     try {
       if (isEditing && selectedCar) {
         // Редактирование существующего автомобиля
-        const updatedCars = cars.map(car => 
-          car.id === selectedCar.id ? { 
-            ...formData, 
-            id: selectedCar.id,
-            updatedAt: new Date().toISOString()
-          } : car
-        );
-        setCars(updatedCars);
-        localStorage.setItem('cars', JSON.stringify(updatedCars));
-        alert('Автомобиль успешно обновлен!');
+        const updatedCar = storage.updateCar(selectedCar.id, {
+          ...formData,
+          images: formData.images.map(img => img.url)
+        });
         
-        // Перенаправляем на страницу товара
-        router.push(`/cars/${selectedCar.id}`);
+        if (updatedCar) {
+          setCars(storage.getCars());
+          alert('Автомобиль успешно обновлен!');
+          router.push(`/cars/${selectedCar.id}`);
+        }
       } else {
         // Добавление нового автомобиля
-        const newCar = {
+        const newCar = storage.addCar({
           ...formData,
-          id: Date.now().toString(),
           currency: 'EUR',
-          image: '/images/default-car.svg', // Используем статическое изображение
-          images: formData.images.map(img => img.url), // Сохраняем только URL для отображения
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        const updatedCars = [...cars, newCar];
-        setCars(updatedCars);
-        localStorage.setItem('cars', JSON.stringify(updatedCars));
+          image: formData.images[0]?.url || '/images/default-car.svg',
+          images: formData.images.map(img => img.url)
+        });
+        
+        setCars(storage.getCars());
         alert('Автомобиль успешно добавлен!');
         
-        // Перенаправляем на страницу товара
         router.push(`/cars/${newCar.id}`);
       }
       
@@ -163,9 +158,11 @@ export default function Admin() {
   };
 
   const deleteCar = (carId) => {
-    const updatedCars = cars.filter(car => car.id !== carId);
-    setCars(updatedCars);
-    localStorage.setItem('cars', JSON.stringify(updatedCars));
+    if (confirm('Вы уверены, что хотите удалить этот автомобиль?')) {
+      storage.deleteCar(carId);
+      setCars(storage.getCars());
+      alert('Автомобиль успешно удален!');
+    }
   };
 
   const resetForm = () => {
