@@ -1,0 +1,36 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Кузов автомобиля -->
+  <rect x="50" y="120" width="300" height="80" rx="10" fill="#E5E7EB" stroke="#9CA3AF" stroke-width="2"/>
+  
+  <!-- Крыша -->
+  <path d="M80 120 L160 80 L240 80 L320 120 L320 140 L80 140 Z" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2"/>
+  
+  <!-- Лобовое стекло -->
+  <path d="M90 120 L150 85 L150 135 L90 135 Z" fill="#93C5FD" stroke="#3B82F6" stroke-width="1"/>
+  
+  <!-- Заднее стекло -->
+  <path d="M250 120 L310 120 L310 135 L250 135 Z" fill="#93C5FD" stroke="#3B82F6" stroke-width="1"/>
+  
+  <!-- Передние колеса -->
+  <circle cx="100" cy="200" r="25" fill="#374151" stroke="#1F2937" stroke-width="2"/>
+  <circle cx="100" cy="200" r="15" fill="#6B7280"/>
+  
+  <!-- Задние колеса -->
+  <circle cx="300" cy="200" r="25" fill="#374151" stroke="#1F2937" stroke-width="2"/>
+  <circle cx="300" cy="200" r="15" fill="#6B7280"/>
+  
+  <!-- Фары -->
+  <circle cx="60" cy="150" r="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  <circle cx="340" cy="150" r="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+  
+  <!-- Решетка радиатора -->
+  <rect x="45" y="140" width="20" height="20" rx="2" fill="#4B5563" stroke="#374151" stroke-width="1"/>
+  
+  <!-- Дверные ручки -->
+  <rect x="120" y="160" width="8" height="3" rx="1" fill="#6B7280"/>
+  <rect x="180" y="160" width="8" height="3" rx="1" fill="#6B7280"/>
+  <rect x="240" y="160" width="8" height="3" rx="1" fill="#6B7280"/>
+  
+  <!-- Тень -->
+  <ellipse cx="200" cy="230" rx="180" ry="10" fill="#000000" opacity="0.1"/>
+</svg>

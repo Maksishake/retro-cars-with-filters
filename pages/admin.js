@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ImageUpload from '../components/ImageUpload';
 
 export default function Admin() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [cars, setCars] = useState([]);
@@ -124,13 +126,17 @@ export default function Admin() {
         setCars(updatedCars);
         localStorage.setItem('cars', JSON.stringify(updatedCars));
         alert('Автомобиль успешно обновлен!');
+        
+        // Перенаправляем на страницу товара
+        router.push(`/cars/${selectedCar.id}`);
       } else {
         // Добавление нового автомобиля
         const newCar = {
           ...formData,
           id: Date.now().toString(),
           currency: 'EUR',
-          image: formData.images[0]?.url || '/images/default-car.svg',
+          image: '/images/default-car.svg', // Используем статическое изображение
+          images: formData.images.map(img => img.url), // Сохраняем только URL для отображения
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -138,6 +144,9 @@ export default function Admin() {
         setCars(updatedCars);
         localStorage.setItem('cars', JSON.stringify(updatedCars));
         alert('Автомобиль успешно добавлен!');
+        
+        // Перенаправляем на страницу товара
+        router.push(`/cars/${newCar.id}`);
       }
       
       resetForm();

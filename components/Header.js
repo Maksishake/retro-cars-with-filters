@@ -42,6 +42,7 @@ export default function Header() {
               currentLanguage={currentLanguage} 
               onLanguageChange={setCurrentLanguage} 
             />
+            
           </nav>
 
           {/* Mobile menu button */}
