@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import FavoriteButton from './FavoriteButton';
+import CallButton from './CallButton';
 
 export default function CarCard({ car }) {
   const formatPrice = (price, currency) => {
@@ -48,12 +50,8 @@ export default function CarCard({ car }) {
         </div>
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="flex space-x-2">
-            <button className="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-white transition-colors duration-200">
-              ❤️ Избранное
-            </button>
-            <button className="bg-red-600/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium hover:bg-red-600 transition-colors duration-200">
-              📞 Позвонить
-            </button>
+            <FavoriteButton carId={car.id} carName={car.name} />
+            <CallButton />
           </div>
         </div>
       </div>

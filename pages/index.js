@@ -26,10 +26,29 @@ export default function Home() {
 
   // Загружаем данные из localStorage при загрузке страницы
   useEffect(() => {
-    const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
-    if (savedCars.length > 0) {
-      setAllCars(savedCars);
-    }
+    const loadCars = () => {
+      const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+      if (savedCars.length > 0) {
+        setAllCars(savedCars);
+      }
+    };
+    
+    loadCars();
+    
+    // Слушаем изменения в localStorage
+    const handleStorageChange = () => {
+      loadCars();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Также обновляем при фокусе на окне (когда возвращаемся с админки)
+    window.addEventListener('focus', loadCars);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', loadCars);
+    };
   }, []);
 
   // Get unique values for filters
@@ -125,14 +144,6 @@ export default function Home() {
               Откройте для себя легендарные автомобили СССР в отличном состоянии. 
               Полная реставрация, оформление документов, доставка по всей Европе.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary text-lg px-8 py-4">
-                Смотреть каталог
-              </button>
-              <button className="btn-secondary text-lg px-8 py-4">
-                Узнать больше
-              </button>
-            </div>
           </div>
         </section>
 

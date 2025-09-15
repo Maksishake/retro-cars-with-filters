@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,10 +8,64 @@ import ImageGallery from '../../components/ImageGallery';
 import TechnicalSpecs from '../../components/TechnicalSpecs';
 import FeaturesAndHistory from '../../components/FeaturesAndHistory';
 import SimilarCars from '../../components/SimilarCars';
+import FavoriteButton from '../../components/FavoriteButton';
+import CallButton from '../../components/CallButton';
 import cars from '../../data/cars';
 
-export default function CarDetail({ car }) {
+export default function CarDetail({ carId }) {
   const [activeTab, setActiveTab] = useState('description');
+  const [car, setCar] = useState(null);
+  const [allCars, setAllCars] = useState(cars);
+  const [loading, setLoading] = useState(true);
+
+  // Загружаем данные из localStorage при загрузке страницы
+  useEffect(() => {
+    const loadCarData = () => {
+      try {
+        const savedCars = JSON.parse(localStorage.getItem('cars') || '[]');
+        let carsToUse = savedCars.length > 0 ? savedCars : cars;
+        
+        setAllCars(carsToUse);
+        
+        // Ищем автомобиль по ID
+        const foundCar = carsToUse.find(c => c.id === carId);
+        if (foundCar) {
+          setCar(foundCar);
+        } else {
+          // Если не найден в сохраненных данных, ищем в статических
+          const staticCar = cars.find(c => c.id === carId);
+          if (staticCar) {
+            setCar(staticCar);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        // Fallback к статическим данным
+        const staticCar = cars.find(c => c.id === carId);
+        if (staticCar) {
+          setCar(staticCar);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCarData();
+  }, [carId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Загрузка...</h1>
+          <p className="text-gray-600">Загружаем информацию об автомобиле</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!car) {
     return (
@@ -213,12 +267,9 @@ export default function CarDetail({ car }) {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Заинтересованы в этом автомобиле?</h3>
                 
                 <div className="space-y-4">
-                  <button className="w-full btn-primary">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    Позвонить сейчас
-                  </button>
+                  <FavoriteButton carId={car.id} carName={car.name} />
+                  
+                  <CallButton />
                   
                   <button className="w-full btn-secondary">
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +335,7 @@ export default function CarDetail({ car }) {
 
           {/* Similar Cars */}
           <div className="mt-12">
-            <SimilarCars currentCar={car} allCars={cars} />
+            <SimilarCars currentCar={car} allCars={allCars} />
           </div>
         </main>
 
@@ -294,48 +345,11 @@ export default function CarDetail({ car }) {
   );
 }
 
-export async function getStaticPaths() {
-  // Получаем данные из localStorage или из файла
-  let allCars = cars;
-  
-  try {
-    // В реальном приложении здесь будет API запрос
-    const savedCars = JSON.parse(process.env.NODE_ENV === 'development' ? '[]' : '[]');
-    if (savedCars.length > 0) {
-      allCars = savedCars;
-    }
-  } catch (error) {
-    console.error('Ошибка загрузки данных:', error);
-  }
-
-  const paths = allCars.map((car) => ({
-    params: { id: car.id },
-  }));
-
-  return {
-    paths,
-    fallback: true, // Изменено на true для динамических данных
-  };
-}
-
-export async function getStaticProps({ params }) {
-  let allCars = cars;
-  
-  try {
-    // В реальном приложении здесь будет API запрос
-    const savedCars = JSON.parse(process.env.NODE_ENV === 'development' ? '[]' : '[]');
-    if (savedCars.length > 0) {
-      allCars = savedCars;
-    }
-  } catch (error) {
-    console.error('Ошибка загрузки данных:', error);
-  }
-
-  const car = allCars.find((car) => car.id === params.id);
-
+export async function getServerSideProps({ params }) {
+  // Возвращаем только ID, данные будем загружать на клиенте
   return {
     props: {
-      car: car || null,
+      carId: params.id,
     },
   };
 }

@@ -16,8 +16,8 @@ export default function Header() {
                 <span className="text-red-800 font-bold text-2xl">R</span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold gradient-text">UUSR Retro Cars</h1>
-                <p className="text-sm text-red-200/80 font-medium">Soviet Classic Cars</p>
+                <h1 className="text-3xl font-bold text-white drop-shadow-lg">USSR Retro Cars</h1>
+                <p className="text-sm text-red-200/90 font-medium drop-shadow-md">Soviet Classic Cars</p>
               </div>
             </Link>
           </div>
@@ -36,9 +36,7 @@ export default function Header() {
             <Link href="/contact" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
               Контакты
             </Link>
-            <Link href="/admin" className="px-4 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 font-medium hover:scale-105">
-              Админ
-            </Link>
+            
             <div className="w-px h-8 bg-white/20 mx-2"></div>
             <LanguageSwitcher 
               currentLanguage={currentLanguage} 
